@@ -94,3 +94,68 @@ export function updateTile(x, y, newTileType) {
   tile.style.backgroundColor = COLORS[newTileType] || COLORS[EMPTY];
   tile.dataset.tileType = newTileType;
 }
+
+
+// Client-side animation state for each player
+const playerAnimationState = new Map();
+
+// Render all players initially
+export function renderPlayers(playersData) {
+  const gameContainer = document.getElementById("game-container");
+  if (!gameContainer) return;
+
+  // Handle both single object and array inputs + Update only alive players
+  const players = Array.isArray(playersData) ? playersData : [playersData];
+  const alivePlayers = players.filter((player) => player.isAlive);
+
+  alivePlayers.forEach((player) => {
+    // Remove existing player element if it exists (for updates)
+    const existingPlayerEl = gameContainer.querySelector(`#player-${player.id}`);
+    if (existingPlayerEl) {
+      existingPlayerEl.remove();
+    }
+
+    // Initialize animation state for new players
+    if (!playerAnimationState.has(player.id)) {
+      playerAnimationState.set(player.id, {
+        frame: STOPED_FRAME,
+        direction: "down", // Default direction
+        lastX: player.x,
+        lastY: player.y,
+      });
+    }
+
+    // Add lives display
+    const livesElement = h(
+      "div",
+      {
+        class: "player-lives",
+      },
+      `❤️ ${player.lives}`
+    );
+
+    const playerElement = h(
+      "div",
+      {
+        id: `player-${player.id}`,
+        class: "player",
+        style: {
+          position: "absolute",
+          width: `${TILE_SIZE}px`,
+          height: `${TILE_SIZE}px`,
+          backgroundImage: `url(${playerSprites[player.id]})`,
+          backgroundSize: `${TILE_SIZE}px ${TILE_SIZE}px`, // scale to cell
+          backgroundPosition: "center center",
+          backgroundRepeat: "no-repeat",
+          transform: `translate(${player.x * TILE_SIZE}px, ${player.y * TILE_SIZE}px)`,
+          transition: "transform 0.1s linear",
+          zIndex: 10,
+        },
+      },
+      [livesElement]
+    );
+    // createDOMElement(gameContainer, createDOMElement(playerElement));
+    const domPlayer = createDOMElement(playerElement);
+    gameContainer.appendChild(domPlayer);
+  });
+}
