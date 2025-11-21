@@ -303,3 +303,43 @@ export function removePowerup(powerupId) {
   const powerupElement = document.getElementById(`powerup-${powerupId}`);
   if (powerupElement) powerupElement.remove();
 }
+
+
+//render an explosion
+export function renderExplosion(affectedTiles) {
+  const gameContainer = document.getElementById("game-container");
+  if (!gameContainer || !Array.isArray(affectedTiles)) return;
+
+  affectedTiles.forEach((tile, tileIndex) => {
+    const explosionId = `explosion-${tile.x}-${tile.y}-${Date.now()}-${tileIndex}`;
+
+    const explosionVNode = h("img", {
+      id: explosionId,
+      class: "explosion flame-effect",
+      src: explosionSprite.src, // assuming this is a GIF
+      style: {
+        width: `${TILE_SIZE}px`,
+        height: `${TILE_SIZE}px`,
+        position: "absolute",
+        zIndex: 6,
+        pointerEvents: "none",
+        left: `${tile.x * TILE_SIZE}px`,
+        top: `${tile.y * TILE_SIZE}px`,
+      },
+    });
+
+    const explosionElement = createDOMElement(explosionVNode);
+    gameContainer.appendChild(explosionElement);
+
+    // Automatically remove the GIF after its duration (e.g., 800ms)
+    setTimeout(() => {
+      explosionElement.remove();
+    }, 800);
+  });
+}
+
+export function updatePlayerPosition(el, player) {
+  el.style.transform = `translate(${player.x * TILE_SIZE}px, ${player.y * TILE_SIZE}px)`;
+  const livesBadge = el.querySelector(".player-lives");
+  if (livesBadge) livesBadge.textContent = `❤️ ${player.lives}`;
+}
