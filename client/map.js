@@ -86,3 +86,11 @@ function renderTiles(container, map) {
     }
   }
 }
+
+export function updateTile(x, y, newTileType) {
+  const tile = document.querySelector(`div[data-x="${x}"][data-y="${y}"]`);
+  if (!tile) return;
+  // repaint in-place
+  tile.style.backgroundColor = COLORS[newTileType] || COLORS[EMPTY];
+  tile.dataset.tileType = newTileType;
+}
