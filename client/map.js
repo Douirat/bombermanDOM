@@ -159,3 +159,59 @@ export function renderPlayers(playersData) {
     gameContainer.appendChild(domPlayer);
   });
 }
+
+// store bomb animation handles here to clear them later
+const bombAnimationHandles = new Map();
+
+// function to render a bomb
+export function renderBomb(bomb) {
+  const gameContainer = document.getElementById("game-container");
+  if (!gameContainer) return;
+
+  const BOMB_SPRITE_FRAMES = 3;
+  const bombVNode = h("div", {
+    id: `bomb-${bomb.id}`,
+    class: "bomb",
+    style: {
+      position: "absolute",
+      backgroundPosition: `0px 0px`,
+      width: `${TILE_SIZE}px`,
+      height: `${TILE_SIZE}px`,
+      backgroundImage: `url(${bombSprite.src})`,
+      backgroundSize: `${TILE_SIZE * BOMB_SPRITE_FRAMES}px ${TILE_SIZE}px`,
+      left: `${bomb.x * TILE_SIZE}px`,
+      top: `${bomb.y * TILE_SIZE}px`,
+      zIndex: 5,
+      overflow: "hidden",
+      backgroundRepeat: "no-repeat",
+    },
+  });
+
+  const bombElement = createDOMElement(bombVNode);
+  gameContainer.appendChild(bombElement);
+
+  let currentFrame = 0;
+  let lastFrameTime = 0;
+  const frameDuration = 100; // in ms, to control animation speed
+
+  function animateBomb(timestamp) {
+    if (lastFrameTime === 0) {
+      lastFrameTime = timestamp;
+    }
+    const tpsecoule = timestamp - lastFrameTime;
+
+    if (tpsecoule > frameDuration) {
+      lastFrameTime = timestamp - (tpsecoule % frameDuration);
+      currentFrame = (currentFrame + 1) % BOMB_SPRITE_FRAMES;
+      bombElement.style.backgroundPosition = `-${currentFrame * TILE_SIZE}px 0px`;
+    }
+
+    // Continue the animation loop and store the handle to be able to cancel it
+    const handle = requestAnimationFrame(animateBomb);
+    bombAnimationHandles.set(bomb.id, handle);
+  }
+
+  // Start the animation
+  const initialHandle = requestAnimationFrame(animateBomb);
+  bombAnimationHandles.set(bomb.id, initialHandle);
+}
