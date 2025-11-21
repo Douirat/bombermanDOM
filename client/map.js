@@ -228,3 +228,78 @@ export function removeBomb(bombId) {
     bombElement.remove();
   }
 }
+
+
+const POWERUPS = { SPEED: "speed", BOMBPOWER: "bombPower", FLAMES: "flames" };
+
+const speedPowerupImg = new Image();
+speedPowerupImg.src = "./assets/speed.png";
+
+const bombPowerupImg = new Image();
+bombPowerupImg.src = "./assets/bomb.png";
+
+// render POowerups
+export function renderPowerups(powerupsData) {
+  const gameContainer = document.getElementById("game-container");
+  if (!gameContainer) return;
+
+  // Clear existing powerups to prevent duplicates
+  gameContainer.querySelectorAll(".powerup").forEach((el) => el.remove());
+
+  powerupsData.forEach((powerup) => {
+    // Determine which image to use
+    let powerupImg;
+    switch (powerup.type) {
+      case POWERUPS.SPEED:
+        powerupImg = speedPowerupImg;
+        break;
+      case POWERUPS.BOMBPOWER:
+        powerupImg = bombPowerupImg;
+        break;
+      case POWERUPS.FLAMES:
+        powerupImg = flamesPowerupImg;
+        break;
+      default:
+        console.warn("Unknown powerup type:", powerup.type);
+        return;
+    }
+
+    const powerupElement = createDOMElement(
+      h("div", {
+        id: `powerup-${powerup.id}`,
+        class: `powerup powerup-${powerup.type.toLowerCase()}`,
+        style: {
+          left: `${powerup.x * TILE_SIZE}px`,
+          top: `${powerup.y * TILE_SIZE}px`,
+          width: `${TILE_SIZE}px`,
+          height: `${TILE_SIZE}px`,
+          backgroundImage: powerupImg.complete ? `url(${powerupImg.src})` : "none",
+          backgroundSize: `${TILE_SIZE}px ${TILE_SIZE}px`,
+          backgroundPosition: "center center",
+          backgroundRepeat: "no-repeat",
+          position: "absolute",
+          zIndex: 10,
+        },
+      })
+    );
+
+    // Handle image loading if it wasn't ready
+    if (!powerupImg.complete) {
+      powerupImg.onload = () => {
+        powerupElement.style.backgroundImage = `url(${powerupImg.src})`;
+      };
+    }
+
+    gameContainer.appendChild(powerupElement);
+  });
+}
+
+export function renderSinglePowerup(powerup) {
+  // Reuse the existing function with an array of one
+  if (powerup) renderPowerups([powerup]);
+}
+
+export function removePowerup(powerupId) {
+  const powerupElement = document.getElementById(`powerup-${powerupId}`);
+  if (powerupElement) powerupElement.remove();
+}
