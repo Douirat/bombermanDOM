@@ -215,3 +215,16 @@ export function renderBomb(bomb) {
   const initialHandle = requestAnimationFrame(animateBomb);
   bombAnimationHandles.set(bomb.id, initialHandle);
 }
+
+// function to remove a bomb
+export function removeBomb(bombId) {
+  const bombElement = document.getElementById(`bomb-${bombId}`);
+  if (bombElement) {
+    // Clear the animation frame before removing the element
+    if (bombAnimationHandles.has(bombId)) {
+      cancelAnimationFrame(bombAnimationHandles.get(bombId));
+      bombAnimationHandles.delete(bombId);
+    }
+    bombElement.remove();
+  }
+}
