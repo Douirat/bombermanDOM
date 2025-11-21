@@ -58,3 +58,31 @@ export function renderMap(map) {
   gameArea.appendChild(gameContainerElement);
   renderTiles(gameContainerElement, map);
 }
+
+
+// Render tiles into the map
+function renderTiles(container, map) {
+  container.innerHTML = "";
+  // Create tiles using DOM elements
+  for (let y = 0; y < MAP_SIZE; y++) {
+    for (let x = 0; x < MAP_SIZE; x++) {
+      const tileType = map[y][x]; // WALL, BREAKABLE_WALL, or EMPTY
+
+      const tileVNode = h("div", {
+        style: {
+          width: `${TILE_SIZE}px`,
+          height: `${TILE_SIZE}px`,
+          boxSizing: "border-box",
+          backgroundColor: COLORS[tileType] || COLORS[EMPTY],
+          border: "1px solid #888", // gridlines if you like
+        },
+        // optional data attrs so you can still query later
+        "data-x": x,
+        "data-y": y,
+        "data-tile-type": tileType,
+      });
+
+      container.appendChild(createDOMElement(tileVNode));
+    }
+  }
+}
