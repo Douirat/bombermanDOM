@@ -97,3 +97,28 @@ export function handleInterrupt(close) {
   gameEvents.destroy(); // Clear all event listeners from the DOM
   renderLogin(); // Automatically removes game container from DOM
 }
+
+// Player position updates + Centralized sync with game state
+export function handlePlayersUpdate(playersData) {
+  const currentState = gameState.state;
+  const currentPlayersData = currentState.playersData || [];
+
+  // Find eliminated players
+  const eliminatedPlayers = currentPlayersData.filter((currentPlayer) => {
+    const updatedPlayer = playersData.find((p) => p.id === currentPlayer.id);
+    return updatedPlayer ? !updatedPlayer.isAlive && currentPlayer.isAlive : false;
+  });
+
+  // Remove eliminated players
+  eliminatedPlayers.forEach((player) => {
+    removePlayerFromDOM(player.id);
+  });
+
+  // Find players who left by comparing IDs
+  const newPlayerIds = new Set(playersData.map((player) => player.id));
+  const playersWhoLeft = currentPlayersData.filter((player) => !newPlayerIds.has(player.id));
+
+  // Remove departed players
+  if (playersWhoLeft.length > 0) {
+    removePlayersFromGame(playersWhoLeft);
+  }
