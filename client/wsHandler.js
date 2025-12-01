@@ -89,3 +89,11 @@ export function handleStart(map, playersData) {
   handlePlayersUpdate(playersData);
   document.activeElement.blur();
 }
+
+export function handleInterrupt(close) {
+  close(); // Close WS , thus remove left user from game instance
+  alert("You must be at least 2 players."); // Only after close()
+  gameState.setState({ gameStarted: false, playersData: [], bombsData: [] });
+  gameEvents.destroy(); // Clear all event listeners from the DOM
+  renderLogin(); // Automatically removes game container from DOM
+}
