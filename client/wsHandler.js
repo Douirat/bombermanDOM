@@ -71,3 +71,21 @@ export function handleTimer(data) {
     waiting.append("Game is starting in ", secondsSpan, "s!");
   }
 }
+
+
+export function handleStart(map, playersData) {
+  const title = document.querySelector("#game-area h2");
+  document.querySelector(".waiting").remove();
+  title.innerHTML = "Game started!";
+  gameState.setState({
+    gameStarted: true,
+    map: map,
+    playersData: playersData,
+    bombsData: [],
+    powerupsData: [],
+  });
+  renderMap(map);
+  renderPlayers(playersData);
+  handlePlayersUpdate(playersData);
+  document.activeElement.blur();
+}
