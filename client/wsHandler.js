@@ -257,3 +257,27 @@ export function handleGameOver(data) {
     gameContainer.style.pointerEvents = "none";
   }
 }
+
+export function handlePlayerEliminated(data) {
+  // Update game state
+  const playersData = gameState.state.playersData.map((player) => {
+    if (player.id === data.id) {
+      return { ...player, isAlive: false };
+    }
+    return player;
+  });
+  gameState.setState({ playersData });
+
+  // Remove from DOM
+  const playerElement = document.getElementById(`player-${data.id}`);
+  if (playerElement) {
+    playerElement.remove();
+  }
+
+  // Show elimination message
+  const chatMessages = document.querySelector("#chat-messages");
+  const message = createDOMElement(
+    h("li", { class: "chat-message elimination" }, `${data.nickname} has been eliminated!`)
+  );
+  chatMessages.appendChild(message);
+}
