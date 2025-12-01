@@ -189,3 +189,71 @@ export function handlePlayerHit(data) {
   });
   gameState.setState({ playersData });
 }
+
+export function handleGameOver(data) {
+  const gameOverContainer = document.createElement("div");
+  gameOverContainer.className = "game-over-container";
+  gameOverContainer.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+    font-size: 24px;
+    text-align: center;
+  `;
+
+  let message = data.winner ? `🎉 ${data.winner} wins the game! 🎉` : "💥 Game ended in a draw! 💥";
+
+  if (data.eliminatedPlayers.length > 0) {
+    message += `<br><small>Eliminated players: ${data.eliminatedPlayers.join(", ")}</small>`;
+  }
+
+  const messageElement = document.createElement("div");
+  messageElement.innerHTML = message;
+  messageElement.style.marginBottom = "20px";
+
+  // Create the Play Again button
+  const playAgainButton = document.createElement("button");
+  playAgainButton.textContent = "Play Again";
+  playAgainButton.style.cssText = `
+    padding: 12px 24px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  `;
+
+  // Add hover effect
+  playAgainButton.onmouseover = () => {
+    playAgainButton.style.backgroundColor = "#45a049";
+  };
+  playAgainButton.onmouseout = () => {
+    playAgainButton.style.backgroundColor = "#4CAF50";
+  };
+
+  // Add click handler to reload the page
+  playAgainButton.onclick = () => {
+    window.location.reload();
+  };
+
+  gameOverContainer.appendChild(messageElement);
+  gameOverContainer.appendChild(playAgainButton);
+  document.body.appendChild(gameOverContainer);
+
+  // Disable game controls
+  const gameContainer = document.getElementById("game-container");
+  if (gameContainer) {
+    gameContainer.style.pointerEvents = "none";
+  }
+}
