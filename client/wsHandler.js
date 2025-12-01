@@ -56,3 +56,18 @@ export function handleChat(data, nickname) {
     document.querySelector("#chat-input")?.focus();
   }
 }
+
+export function handleTimer(data) {
+  const waiting = document.querySelector(".waiting");
+  const secondsSpan = waiting.querySelector(".second") || document.createElement("span");
+
+  secondsSpan.className = "second";
+  secondsSpan.textContent = data.value;
+
+  waiting.innerHTML = "";
+  if (data.phase === 1) {
+    waiting.append("Waiting for players, ", secondsSpan, "s remaining");
+  } else if (data.phase === 2) {
+    waiting.append("Game is starting in ", secondsSpan, "s!");
+  }
+}
