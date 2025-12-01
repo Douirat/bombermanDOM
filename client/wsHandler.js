@@ -136,3 +136,44 @@ export function handleBombPlaced(bomb) {
   gameState.setState({ ...gameState.state, bombsData: [...currentBombs, bomb] });
   renderBomb(bomb); // Render the bomb on the map
 }
+// Handler for bomb explosion
+export function handleBombExploded(bombId, x, y, affectedTiles, updatedMap, hitPlayers) {
+  const gameStateMap = gameState.state.map || [];
+  const gameContainer = document.getElementById("game-container");
+
+  removeBomb(bombId);
+
+  affectedTiles.forEach((tile) => {
+    const newTileType = updatedMap[tile.y][tile.x];
+    updateTile(tile.x, tile.y, newTileType); // Update only affected tiles
+    if (gameStateMap[tile.y]) gameStateMap[tile.y][tile.x] = newTileType; // Update local game state
+  });
+
+  // Met à jour l'état local du jeu avec la nouvelle map
+  gameState.setState({ ...gameState.state, map: updatedMap });
+
+  if (affectedTiles && typeof renderExplosion === "function") {
+    renderExplosion(affectedTiles); // Update explosions
+  }
+
+  // Only update specific players that were affected
+  if (hitPlayers && hitPlayers.length > 0) {
+    const playersData = gameState.state.playersData;
+    hitPlayers.forEach((hitPlayerID) => {
+      const playerData = playersData.find((p) => p.id === hitPlayerID);
+      // Update only this specific player's visual representation
+      if (playerData) {
+        renderPlayers(playerData);
+      }
+    });
+  }
+
+  // Re-render powerups safely
+  const powerupsData = gameState.state.powerupsData || [];
+  if (gameContainer) {
+    gameContainer.querySelectorAll(".powerup").forEach((el) => el.remove());
+  }
+  if (powerupsData.length > 0) {
+    renderPowerups(powerupsData);
+  }
+}
