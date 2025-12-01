@@ -36,3 +36,23 @@ export function handlePlayers(nickname, players) {
     Current players:<br>- <span>${players.join("<br>- ")}</span><br>
     (<span>${players.length}</span> / 4)`;
 }
+
+export function handleChat(data, nickname) {
+  const isSelf = data.sender === nickname;
+  const messageTree = h(
+    "li",
+    {
+      class: `chat-message ${isSelf ? "message-self" : ""}`,
+    },
+    [h("span", { class: "sender" }, `${data.sender}:`), h("span", {}, `${data.content}`)]
+  );
+
+  const chatMessages = document.querySelector("#chat-messages");
+  const messageEl = createDOMElement(messageTree);
+  chatMessages.appendChild(messageEl);
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  if (!gameState.state.gameStarted) {
+    document.querySelector("#chat-input")?.focus();
+  }
+}
