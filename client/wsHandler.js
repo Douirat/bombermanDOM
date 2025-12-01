@@ -177,3 +177,15 @@ export function handleBombExploded(bombId, x, y, affectedTiles, updatedMap, hitP
     renderPowerups(powerupsData);
   }
 }
+
+
+// This function only updates state
+export function handlePlayerHit(data) {
+  const playersData = gameState.state.playersData.map((player) => {
+    if (player.nickname === data.nickname) {
+      return { ...player, lives: data.lives, isAlive: data.isAlive };
+    }
+    return player;
+  });
+  gameState.setState({ playersData });
+}
