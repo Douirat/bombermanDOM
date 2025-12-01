@@ -129,3 +129,10 @@ export function handlePlayersUpdate(playersData) {
 
   gameState.setState({ playersData: playersData }); // Update game state
 }
+
+// Handler for bomb placement
+export function handleBombPlaced(bomb) {
+  const currentBombs = gameState.state.bombsData || [];
+  gameState.setState({ ...gameState.state, bombsData: [...currentBombs, bomb] });
+  renderBomb(bomb); // Render the bomb on the map
+}
