@@ -122,3 +122,10 @@ export function handlePlayersUpdate(playersData) {
   if (playersWhoLeft.length > 0) {
     removePlayersFromGame(playersWhoLeft);
   }
+  // Update or create remaining players
+  playersData.forEach((player) => {
+    updateOrCreatePlayer(player);
+  });
+
+  gameState.setState({ playersData: playersData }); // Update game state
+}
