@@ -185,3 +185,63 @@ export function removePlayerFromInstance(instance, ws) {
     });
   }
 }
+
+
+// Global tile constants for consistency
+const EMPTY = 0;
+const WALL = 1;
+const BREAKABLE_WALL = 2;
+
+// function to handle player movement
+export function movePlayer(ws, direction) {
+  const instance = ws.gameInstance;
+  if (!instance || instance.status !== "started") return;
+
+  const player = instance.players.get(ws);
+  if (!player) return;
+
+  const now = Date.now();
+  if (player.lastMoveTime && now - player.lastMoveTime < player.delai) return;
+
+  let newX = player.x;
+  let newY = player.y;
+
+  switch (direction) {
+    case "up":
+      newY--;
+      break;
+    case "down":
+      newY++;
+      break;
+    case "left":
+      newX--;
+      break;
+    case "right":
+      newX++;
+      break;
+  }
+
+  // Collision detection with map limits and walls
+  const MAP_SIZE = 13;
+  if (newX >= 0 && newX < MAP_SIZE && newY >= 0 && newY < MAP_SIZE) {
+    const targetTile = instance.map[newY][newX];
+    const bombExist = Array.from(instance.bombs.values()).some(
+      (bomb) => bomb.x === newX && bomb.y === newY
+    );
+
+    // Player can move into EMPTY tiles.
+    if (targetTile === EMPTY && !bombExist) {
+      player.x = newX;
+      player.y = newY;
+      player.lastMoveTime = now;
+
+      checkPowerupCollection(instance, player);
+
+      // Broadcast updated player positions
+      broadcast(instance, {
+        type: "playersUpdate",
+        playersData: Array.from(instance.players.values()),
+      });
+    }
+  }
+}
