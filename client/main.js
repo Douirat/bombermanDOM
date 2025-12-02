@@ -118,3 +118,24 @@ async function handleLogin(e) {
     console.error("Login error:", error instanceof Error ? error : new Error(String(error)));
   }
 }
+
+function sendMessage(send, nickname) {
+  return function (e) {
+    e.preventDefault();
+    const messageInput = document.querySelector("#chat-input");
+    const message = messageInput.value.trim();
+
+    if (message) {
+      try {
+        send({
+          type: "chatMessage",
+          sender: nickname,
+          content: message,
+        });
+        messageInput.value = "";
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
+    }
+  };
+}
