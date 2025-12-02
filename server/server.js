@@ -1,4 +1,5 @@
 import { WebSocketServer } from "ws";
+import { deployMap } from "./ws.js";
 
 const ws = new WebSocketServer({ port: 3000 });
 console.log("WS server running at localhost:3000");
@@ -62,3 +63,60 @@ function shuffleArray(array) {
     [array[i], array[j]] = [array[j], array[i]];
   }
 }
+
+export function broadcast(instance, message) {
+  const data = JSON.stringify(message);
+  instance.clients.forEach((_, client) => {
+    if (client.readyState === 1) client.send(data);
+  });
+}
+
+export function countdown(instance, seconds, phase) {
+  if (instance.timer) clearInterval(instance.timer);
+
+  instance.status = phase === 1 ? "phase1" : "phase2";
+  instance.countdown = seconds;
+
+  broadcast(instance, { type: "timer", phase: phase, value: seconds });
+
+  instance.timer = setInterval(() => {
+    instance.countdown--;
+
+    if (instance.countdown >= 1) {
+      broadcast(instance, {
+        type: "timer",
+        value: instance.countdown,
+        phase: instance.status === "phase1" ? 1 : 2,
+      });
+    }
+
+    if (instance.countdown <= 0) {
+      if (instance.status === "phase1") {
+        instance.status = "phase2";
+        instance.countdown = 10;
+        broadcast(instance, { type: "timer", phase: 2, value: 10 });
+      } else if (instance.status === "phase2") {
+        // To render the map
+        clearInterval(instance.timer);
+        instance.status = "started";
+
+        const map = deployMap(); // Generate map on the server
+        instance.map = map; // Store it in the game instance
+        generatePowerups(instance); // Generate powerups on the server
+
+        // Send both the game start and the map to clients
+        broadcast(instance, {
+          type: "gameStart",
+          map: map, // And initial player data
+          playersData: Array.from(instance.players.values()),
+        });
+      }
+    }
+
+    if (instance.status === "phase1" && instance.clients.size === 4) {
+      clearInterval(instance.timer);
+      countdown(instance, 10, 2);
+    }
+  }, 1000);
+}
+
