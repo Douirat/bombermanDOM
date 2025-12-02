@@ -120,3 +120,68 @@ export function countdown(instance, seconds, phase) {
   }, 1000);
 }
 
+export function addPlayer(instance, ws, nickname) {
+  if (instance.clients.size >= 4) return false;
+
+  instance.clients.set(ws, nickname);
+
+  const playerIndex = instance.clients.size - 1; // 0, 1, 2, 3
+  const startPos = PLAYER_START_POS[playerIndex];
+
+  instance.players.set(ws, {
+    nickname: nickname,
+    x: startPos.x,
+    y: startPos.y,
+    id: playerIndex, // Assign a unique ID for client-side rendering
+    speed: 1,
+    maxBombs: 1,
+    bombActive: 0,
+    delai: 100,
+    lives: 3,
+    isAlive: true,
+    bombRange: 1,
+  });
+  ws.gameInstance = instance; // Link the WebSocket to its game instance
+
+  // Broadcast updated player list
+  broadcast(instance, {
+    type: "playersList",
+    players: Array.from(instance.clients.values()),
+  });
+
+  // Start timer logic
+  if (instance.clients.size === 2 && instance.status === "waiting") {
+    countdown(instance, 20, 1);
+  } else if (instance.clients.size === 4 && instance.status === "phase1") {
+    clearInterval(instance.timer);
+    countdown(instance, 10, 2);
+  }
+
+  return true;
+}
+
+export function removePlayerFromInstance(instance, ws) {
+  instance.clients.delete(ws);
+  instance.players.delete(ws); // Also remove play data
+
+  if (instance.clients.size < 2 && instance.status !== "waiting") {
+    clearInterval(instance.timer);
+    instance.status = "waiting";
+    broadcast(instance, { type: "gameInterrupt" });
+  } else if (instance.clients.size === 3 && instance.status === "phase2") {
+    clearInterval(instance.timer);
+    countdown(instance, 20, 1);
+  }
+
+  if (instance.clients.size > 0) {
+    broadcast(instance, {
+      type: "playersList",
+      players: Array.from(instance.clients.values()),
+    });
+    // Also broadcast updated player positions after someone leaves
+    broadcast(instance, {
+      type: "playersUpdate",
+      playersData: Array.from(instance.players.values()),
+    });
+  }
+}
