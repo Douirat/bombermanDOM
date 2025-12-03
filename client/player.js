@@ -1,5 +1,5 @@
 import { Listener } from "../framework/event.js";
-// import { updatePlayerPosition } from "./map.js";
+import { updatePlayerPosition } from "./map.js";
 
 let sendSocketMessage; // Use WS' rtesolved send()
 
@@ -31,5 +31,31 @@ function handleKeyDown(event) {
   if (event.key === " ") {
     event.preventDefault();
     sendSocketMessage({ type: "placeBomb" });
+  }
+}
+
+// Remove specific player from DOM
+export function removePlayerFromDOM(playerId) {
+  const gameContainer = document.getElementById("game-container");
+  if (!gameContainer) return;
+
+  const playerElement = gameContainer.querySelector(`#player-${playerId}`);
+  if (playerElement) {
+    playerElement.classList.add("eliminated");
+    setTimeout(() => playerElement.remove(), 500);
+  }
+}
+
+export function updateOrCreatePlayer(player) {
+  const gameContainer = document.getElementById("game-container");
+  if (!gameContainer) return;
+
+  const existingPlayer = gameContainer.querySelector(`#player-${player.id}`);
+  if (existingPlayer) {
+    // move the existing div
+    updatePlayerPosition(existingPlayer, player);
+  } else {
+    // fall back to creating it (or let renderPlayers handle it)
+    // e.g. renderPlayers([player]);
   }
 }
