@@ -325,3 +325,142 @@ export function handleBombPlacement(ws) {
     }
   }, bomb.timer);
 }
+
+export function handleBombExplosion(instance, bomb) {
+  const MAP_SIZE = 13;
+  const affectedTiles = [];
+  const hitPlayers = new Set();
+
+  // Center of the explosion
+  affectedTiles.push({ x: bomb.x, y: bomb.y });
+
+  // Explosion in four directions
+  const directions = [
+    { dx: 1, dy: 0 },
+    { dx: -1, dy: 0 },
+    { dx: 0, dy: 1 },
+    { dx: 0, dy: -1 },
+  ];
+
+  for (const dir of directions) {
+    for (let i = 1; i <= bomb.range; i++) {
+      const targetX = bomb.x + dir.dx * i;
+      const targetY = bomb.y + dir.dy * i;
+
+      if (targetX >= 0 && targetX < MAP_SIZE && targetY >= 0 && targetY < MAP_SIZE) {
+        const tile = instance.map[targetY][targetX];
+        if (tile === BREAKABLE_WALL) {
+          instance.map[targetY][targetX] = EMPTY;
+          affectedTiles.push({ x: targetX, y: targetY });
+
+          // Check if a powerup was hidden here
+          const hiddenPowerupType = instance.hiddenPowerups.get(`${targetX},${targetY}`);
+          if (hiddenPowerupType) {
+            const powerupId = `powerup-${targetX}-${targetY}-${Date.now()}`;
+            const powerup = {
+              id: powerupId,
+              x: targetX,
+              y: targetY,
+              type: hiddenPowerupType,
+            };
+            instance.powerups.set(powerupId, powerup);
+            instance.hiddenPowerups.delete(`${targetX},${targetY}`); // Not hidden
+            // Broadcast that a new powerup has appeared
+            broadcast(instance, { type: "powerupAppeared", powerup: powerup });
+          }
+          break;
+        } else if (tile === EMPTY) {
+          // Explosion can pass through empty tiles
+          affectedTiles.push({ x: targetX, y: targetY });
+        } else {
+          //
+          break; // Stop the explosion in this direction in a solid wall (WALL = 1)
+        }
+      } else {
+        // Out of bounds
+        break;
+      }
+    }
+  }
+
+  // Check all affected tiles for players
+  affectedTiles.forEach((tile) => {
+    for (const [ws, player] of instance.players) {
+      if (player.isAlive && player.x === tile.x && player.y === tile.y) {
+        hitPlayers.add(ws);
+      }
+    }
+  });
+
+  const GAME_OVER_DELAY = 500;
+
+  hitPlayers.forEach((ws) => {
+    const player = instance.players.get(ws);
+    player.lives--;
+
+    if (player.lives <= 0) {
+      player.isAlive = false;
+      ws.removeAllListeners("message");
+
+      instance.eliminatedPlayers.add(player.nickname);
+
+      // Only allow chat messages from eliminated players
+      ws.on("message", (message) => {
+        try {
+          const data = JSON.parse(message);
+          if (data.type === "chatMessage") {
+            broadcast(instance, {
+              type: "chatMessage",
+              sender: player.nickname,
+              content: data.content,
+            });
+          }
+        } catch (err) {
+          console.error("Invalid message from eliminated player:", err);
+        }
+      });
+
+      // Broadcast elimination
+      broadcast(instance, {
+        type: "playerEliminated",
+        nickname: player.nickname,
+        id: player.id,
+      });
+    }
+
+    // Broadcast player hit
+    broadcast(instance, {
+      type: "playerHit",
+      nickname: player.nickname,
+      lives: player.lives,
+      isAlive: player.isAlive,
+    });
+  });
+
+  setTimeout(() => {
+    if (!instance.gameOver) {
+      const alivePlayers = Array.from(instance.players.values()).filter((p) => p.isAlive);
+      if (alivePlayers.length <= 1) {
+        instance.gameOver = true;
+        const winner = alivePlayers.length === 1 ? alivePlayers[0].nickname : null;
+        broadcast(instance, {
+          type: "gameOver",
+          winner: winner,
+          timestamp: Date.now(),
+          eliminatedPlayers: Array.from(instance.eliminatedPlayers),
+        });
+      }
+    }
+  }, GAME_OVER_DELAY);
+
+  // Broadcast the explosion and updated map to all clients in the instance
+  broadcast(instance, {
+    type: "bombExploded",
+    bombId: bomb.id,
+    x: bomb.x,
+    y: bomb.y,
+    affectedTiles: affectedTiles, // Send tiles affected by explosion
+    updatedMap: instance.map, // Send the updated map
+    hitPlayers: Array.from(hitPlayers).map((ws) => instance.players.get(ws).id),
+  });
+}
