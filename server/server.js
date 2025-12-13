@@ -264,3 +264,19 @@ function checkPowerupCollection(instance, player) {
     }
   }
 }
+
+function applyPowerup(player, powerupType) {
+  switch (powerupType) {
+    case POWERUPS.SPEED:
+      // Reduce delay by 20% each time (e.g., 100ms → 80ms → 64ms)
+      player.delai = Math.max(50, player.delai * 0.8); // Cap at 50ms minimum
+      break;
+    case POWERUPS.BOMBPOWER:
+      player.maxBombs = Math.min(player.maxBombs + 1, 3);
+      break;
+    case POWERUPS.FLAMES:
+      player.bombRange = player.bombRange + 1;
+      break;
+  }
+}
+
