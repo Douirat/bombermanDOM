@@ -245,3 +245,22 @@ export function movePlayer(ws, direction) {
     }
   }
 }
+
+
+function checkPowerupCollection(instance, player) {
+  for (const [powerupId, powerup] of instance.powerups) {
+    if (powerup.x === player.x && powerup.y === player.y) {
+      applyPowerup(player, powerup.type);
+      instance.powerups.delete(powerupId);
+
+      broadcast(instance, {
+        type: "powerupCollection",
+        powerupId: powerupId,
+        playerNickname: player.nickname,
+        powerupType: powerup.type,
+      });
+
+      break;
+    }
+  }
+}
