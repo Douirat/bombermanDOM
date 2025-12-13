@@ -280,3 +280,48 @@ function applyPowerup(player, powerupType) {
   }
 }
 
+// Handle bomb placement
+export function handleBombPlacement(ws) {
+  const instance = ws.gameInstance;
+  if (!instance || instance.status !== "started") return;
+
+  const player = instance.players.get(ws);
+  if (!player) return;
+
+  if (player.bombActive >= player.maxBombs) return;
+
+  for (const bomb of instance.bombs.values()) {
+    if (bomb.x === player.x && bomb.y === player.y) return;
+  }
+
+  // Prevent placing a bomb on a non-empty tile
+  const currentTile = instance.map[player.y][player.x];
+  if (currentTile !== EMPTY) return;
+
+  const bombId = `bomb-${player.x}-${player.y}-${Date.now()}`;
+  const bomb = {
+    id: bombId,
+    x: player.x,
+    y: player.y,
+    owner: player.nickname,
+    timer: 3000,
+    range: player.bombRange,
+  };
+
+  instance.bombs.set(bombId, bomb);
+  player.bombActive++;
+
+  broadcast(instance, {
+    type: "bombPlaced",
+    bomb: { id: bomb.id, x: bomb.x, y: bomb.y },
+  });
+
+  // Set a timeout for the bomb to explode
+  setTimeout(() => {
+    if (instance.bombs.has(bombId)) {
+      instance.bombs.delete(bombId);
+      player.bombActive--;
+      handleBombExplosion(instance, bomb);
+    }
+  }, bomb.timer);
+}
