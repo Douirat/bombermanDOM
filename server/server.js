@@ -464,3 +464,5 @@ export function handleBombExplosion(instance, bomb) {
     hitPlayers: Array.from(hitPlayers).map((ws) => instance.players.get(ws).id),
   });
 }
+
+wsServer(ws, gameInstances, currentInstance);
