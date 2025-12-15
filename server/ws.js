@@ -1,3 +1,13 @@
+import {
+  setupGame,
+  addPlayer,
+  removePlayerFromInstance,
+  broadcast,
+  countdown,
+  movePlayer,
+  handleBombPlacement,
+} from "./server.js";
+
 
 export function deployMap() {
   const MAP_SIZE = 13;
