@@ -8,6 +8,102 @@ import {
   handleBombPlacement,
 } from "./server.js";
 
+export function wsServer(ws, gameInstances, currentInstance) {
+  ws.on("connection", (ws) => {
+    // connection test
+    ws.send(JSON.stringify({ type: "connection", status: "established" }));
+
+    ws.on("message", (message) => {
+      try {
+        const data = JSON.parse(message);
+
+        switch (data.type) {
+          case "nickname":
+            let added = false;
+            let targetInstance = currentInstance;
+            if (
+              !targetInstance ||
+              targetInstance.clients.size >= 4 ||
+              targetInstance.status === "started" ||
+              targetInstance.status === "phase2"
+            ) {
+              console.log("Creating new instance for player:", data.nickname);
+              targetInstance = setupGame();
+              gameInstances.push(targetInstance);
+              currentInstance = targetInstance;
+            }
+
+            added = addPlayer(targetInstance, ws, data.nickname);
+            if (added) ws.send(JSON.stringify({ type: "acknowledge" }));
+            else {
+              ws.send(
+                JSON.stringify({
+                  type: "error",
+                  message: "Failed to join game instance",
+                })
+              );
+            }
+            break;
+
+          case "chatMessage":
+            if (ws.gameInstance) {
+              broadcast(ws.gameInstance, {
+                type: "chatMessage",
+                content: data.content,
+                sender: ws.gameInstance.clients.get(ws),
+              });
+            }
+            break;
+
+          case "timer":
+            if (
+              ws.gameInstance &&
+              ws.gameInstance.clients.size >= 2 &&
+              ws.gameInstance.status === "waiting"
+            ) {
+              countdown(ws.gameInstance, data.value, 1);
+            }
+            break;
+
+          case "playerMove":
+            if (ws.gameInstance) {
+              movePlayer(ws, data.direction);
+            }
+            break;
+
+          case "placeBomb":
+            if (ws.gameInstance) handleBombPlacement(ws);
+            break;
+        }
+      } catch (err) {
+        console.error("Error parsing message:", err);
+        ws.send(
+          JSON.stringify({
+            type: "error",
+            message: "Invalid message format",
+          })
+        );
+      }
+    });
+
+    ws.on("close", () => {
+      if (!ws.gameInstance) return;
+      const instance = ws.gameInstance;
+      removePlayerFromInstance(instance, ws);
+
+      if (instance.clients.size === 0) {
+        const index = gameInstances.indexOf(instance);
+        if (index >= 0) {
+          gameInstances.splice(index, 1);
+          if (currentInstance === instance) {
+            currentInstance = gameInstances.at(-1) || null;
+          }
+        }
+      }
+    });
+  });
+}
+
 
 export function deployMap() {
   const MAP_SIZE = 13;
