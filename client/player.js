@@ -34,6 +34,14 @@ function handleKeyDown(event) {
   }
 }
 
+// Centralized function to handle player removal from DOM and state
+export function removePlayersFromGame(playersToRemove) {
+  if (!playersToRemove.length) return;
+  playersToRemove.forEach((player) => {
+    removePlayerFromDOM(player.id);
+  });
+}
+
 // Remove specific player from DOM
 export function removePlayerFromDOM(playerId) {
   const gameContainer = document.getElementById("game-container");

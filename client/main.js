@@ -1,9 +1,9 @@
 import { Listener } from "../framework/event.js";
 import { createStore } from "../framework/store.js";
-// import { el as h, createDOMElement } from "../framework/minidom.js";
+import { el as h, createDOMElement } from "../framework/minidom.js";
 
-// import { setupPlayerInputHandler } from "./player.js";
-// import { connectToSocket, socketHandler } from "./socket.js";
+import { setupPlayerInputHandler } from "./player.js";
+import { connectToSocket, socketHandler } from "./socket.js";
 
 // Modules instances
 export const gameEvents = {

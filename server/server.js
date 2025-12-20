@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import { deployMap } from "./ws.js";
+import { deployMap, wsServer } from "./ws.js";
 
 const ws = new WebSocketServer({ port: 3000 });
 console.log("WS server running at localhost:3000");

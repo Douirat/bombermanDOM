@@ -47,18 +47,43 @@ h1, h2, h3, h4 {
   gap: 32px;
 }
 
-.login-form {
-  background: rgba(44, 62, 80, 0.95);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.2);
-  padding: 32px 24px;
+
+.login‐form{
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 24px;
+  border: #00e1ff 1px solid;
+  padding: 1vmin;
+  border-radius: 1vmin;
+  font-style: italic;
+  background: rgba(44, 62, 80, 0.95);
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.2);
+  padding: 32px 24px;
   min-width: 320px;
   max-width: 90vw;
 }
+
+
+.input-group {
+width: 40vw;
+height: fit-content;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+align-items: center;
+min-width: 400px;
+gap: 1vmin;
+input{
+  width: 100%;
+  height: 5vh;
+  border-radius: 2vmin;
+  border: #00e1ff 1px solid;
+  padding: 1vmin;
+  font-style: italic;
+}
+}
+
 
 .login-form h1 {
   color: #00e1ff;
