@@ -64,6 +64,6 @@ export function updateOrCreatePlayer(player) {
     updatePlayerPosition(existingPlayer, player);
   } else {
     // fall back to creating it (or let renderPlayers handle it)
-    // e.g. renderPlayers([player]);
+    // e.g. renderPlayers([player])
   }
 }

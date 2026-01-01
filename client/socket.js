@@ -19,6 +19,8 @@ import { el as h, createDOMElement } from "../framework/minidom.js";
 export function socketHandler(nickname, socket, send, close) {
   socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
+    // console.log("the capsule of data is a certain time: ---> ", data);
+    
     switch (data.type) {
       case "timer":
         handleTimer(data);
@@ -38,8 +40,8 @@ export function socketHandler(nickname, socket, send, close) {
       case "bombPlaced": // Bomb placement
         handleBombPlaced(data.bomb);
         break;
-      case "bombExploded": // Bomb explosion
-        // Pass all data properties sent by server
+      case "bombExploded": // Bomb explosion.
+        // Pass all data properties sent by server.
         handleBombExploded(
           data.bombId,
           data.x,
@@ -49,7 +51,7 @@ export function socketHandler(nickname, socket, send, close) {
           data.hitPlayers
         );
         break;
-      case "playerHit": // Update state
+      case "playerHit": // Update state.
         handlePlayerHit(data);
         break;
       case "playerEliminated":
@@ -61,7 +63,7 @@ export function socketHandler(nickname, socket, send, close) {
       case "gameOver":
         handleGameOver(data);
         break;
-      case "powerupCollection": // Powerup collection
+      case "powerupCollection": // Powerup collection.
         const currentPowerups = gameState.state.powerupsData || [];
         const updatedPowerups = currentPowerups.filter((p) => p.id !== data.powerupId);
         gameState.setState({ powerupsData: updatedPowerups });
@@ -83,7 +85,8 @@ export function socketHandler(nickname, socket, send, close) {
 
 export function connectToSocket(nickname) {
   return new Promise((resolve, reject) => {
-    showConnectionStatus("connecting"); // UI update, asynchronous connection
+    showConnectionStatus("connecting"); // UI update, asynchronous connection.
+    
     const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
     let connectionTimeout;
 

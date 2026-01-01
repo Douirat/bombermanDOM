@@ -5,7 +5,7 @@ import { el as h, createDOMElement } from "../framework/minidom.js";
 import { setupPlayerInputHandler } from "./player.js";
 import { connectToSocket, socketHandler } from "./socket.js";
 
-// Modules instances
+// Modules instances.
 export const gameEvents = {
   onEvent: Listener,
 };
@@ -21,7 +21,7 @@ export const gameState =  createStore({
   powerupsData: [],
 });
 
-renderLogin(); // First entry
+renderLogin(); // First entry.
 
 export function renderLogin() {
   const loginForm = h("form", {
@@ -37,17 +37,17 @@ export function renderLogin() {
         ],
       }),
     ],
-    onsubmit: handleLogin, // bind directly by prop
+    onsubmit: handleLogin, // bind directly by prop.
   });
 
   const container = document.querySelector(".main");
-  // completely replace any old content
+  // completely replace any old content.
   container.innerHTML = "";
-  // turn your VNode into a real DOM node
+  // turn your VNode into a real DOM node.
   const domForm = createDOMElement(loginForm);
   // insert it
   container.appendChild(domForm);
-  // now you can safely query() it
+  // now you can safely query() it.
   container.querySelector("input[name=nickname]").focus();
 }
 
@@ -98,21 +98,16 @@ async function handleLogin(e) {
   document.querySelector(".submit-button").disabled = true;
 
   try {
-    renderLobby(); // Note: Keep first to show connectionStatus
-    confirmExit(); // Confirmation dialog before leaving the game
-
+    renderLobby(); // Note: Keep first to show connectionStatus.
+    confirmExit(); // Confirmation dialog before leaving the game.
     const { socket, send, close } = await connectToSocket(nickname);
-
-    socketHandler(nickname, socket, send, close); // Set WS handlers
-
+    socketHandler(nickname, socket, send, close); // Set WS handlers.
     const chatForm = document.querySelector("#chat-form");
     if (chatForm) {
       gameEvents.onEvent(chatForm, "submit", sendMessage(send, nickname));
     }
-
     gameState.setState({ gameStarted: true, actualPlayer: nickname });
-
-    // Setup player input handler after successful connection
+    // Setup player input handler after successful connection.
     setupPlayerInputHandler(send);
   } catch (error) {
     console.error("Login error:", error instanceof Error ? error : new Error(String(error)));

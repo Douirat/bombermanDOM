@@ -156,7 +156,6 @@ export function addPlayer(instance, ws, nickname) {
     clearInterval(instance.timer);
     countdown(instance, 10, 2);
   }
-
   return true;
 }
 

@@ -16,6 +16,7 @@ export function handlePlayers(nickname, players) {
   const waitingEl = document.querySelector(".waiting");
   const playersListEl = document.querySelector(".players-list");
 
+  
   if (!waitingEl || !playersListEl) {
     console.warn("handlePlayers: lobby UI not ready, skipping update");
     return;
@@ -74,6 +75,10 @@ export function handleTimer(data) {
 
 
 export function handleStart(map, playersData) {
+  // console.log("the player data: ----->", playersData);
+  // console.log("the game state is: ---> ", map);
+  console.log("the game state: ----> ", gameState);
+  
   const title = document.querySelector("#game-area h2");
   document.querySelector(".waiting").remove();
   title.innerHTML = "Game started!";
@@ -122,12 +127,12 @@ export function handlePlayersUpdate(playersData) {
   if (playersWhoLeft.length > 0) {
     removePlayersFromGame(playersWhoLeft);
   }
-  // Update or create remaining players
+  // Update or create remaining players:
   playersData.forEach((player) => {
     updateOrCreatePlayer(player);
   });
 
-  gameState.setState({ playersData: playersData }); // Update game state
+  gameState.setState({ playersData: playersData }); // Update game state:
 }
 
 // Handler for bomb placement
@@ -145,15 +150,15 @@ export function handleBombExploded(bombId, x, y, affectedTiles, updatedMap, hitP
 
   affectedTiles.forEach((tile) => {
     const newTileType = updatedMap[tile.y][tile.x];
-    updateTile(tile.x, tile.y, newTileType); // Update only affected tiles
-    if (gameStateMap[tile.y]) gameStateMap[tile.y][tile.x] = newTileType; // Update local game state
+    updateTile(tile.x, tile.y, newTileType); // Update only affected tiles:
+    if (gameStateMap[tile.y]) gameStateMap[tile.y][tile.x] = newTileType; // Update local game state:
   });
 
-  // Met à jour l'état local du jeu avec la nouvelle map
+  // Met à jour l'état local du jeu avec la nouvelle map:
   gameState.setState({ ...gameState.state, map: updatedMap });
 
   if (affectedTiles && typeof renderExplosion === "function") {
-    renderExplosion(affectedTiles); // Update explosions
+    renderExplosion(affectedTiles); // Update explosions:
   }
 
   // Only update specific players that were affected

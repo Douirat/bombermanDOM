@@ -54,6 +54,7 @@ export function renderMap(map) {
       width: `${MAP_SIZE * TILE_SIZE}px`,
     },
   });
+  
   const gameContainerElement = createDOMElement(mapTree);
   gameArea.appendChild(gameContainerElement);
   renderTiles(gameContainerElement, map);
@@ -67,7 +68,8 @@ function renderTiles(container, map) {
   for (let y = 0; y < MAP_SIZE; y++) {
     for (let x = 0; x < MAP_SIZE; x++) {
       const tileType = map[y][x]; // WALL, BREAKABLE_WALL, or EMPTY
-
+      // console.log("tile _-__-_", tileType);
+      
       const tileVNode = h("div", {
         style: {
           width: `${TILE_SIZE}px`,
@@ -103,7 +105,8 @@ const playerAnimationState = new Map();
 export function renderPlayers(playersData) {
   const gameContainer = document.getElementById("game-container");
   if (!gameContainer) return;
-
+  console.log("Players data: ", playersData);
+  
   // Handle both single object and array inputs + Update only alive players
   const players = Array.isArray(playersData) ? playersData : [playersData];
   const alivePlayers = players.filter((player) => player.isAlive);
@@ -125,7 +128,7 @@ export function renderPlayers(playersData) {
       });
     }
 
-    // Add lives display
+    // Add lives display:
     const livesElement = h(
       "div",
       {
@@ -238,7 +241,7 @@ speedPowerupImg.src = "./assets/speed.png";
 const bombPowerupImg = new Image();
 bombPowerupImg.src = "./assets/bomb.png";
 
-// render POowerups
+// render POowerups.
 export function renderPowerups(powerupsData) {
   const gameContainer = document.getElementById("game-container");
   if (!gameContainer) return;
@@ -304,8 +307,7 @@ export function removePowerup(powerupId) {
   if (powerupElement) powerupElement.remove();
 }
 
-
-//render an explosion
+//render an explosion.
 export function renderExplosion(affectedTiles) {
   const gameContainer = document.getElementById("game-container");
   if (!gameContainer || !Array.isArray(affectedTiles)) return;
